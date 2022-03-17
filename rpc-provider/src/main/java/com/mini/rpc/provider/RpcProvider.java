@@ -38,6 +38,9 @@ public class RpcProvider implements InitializingBean, BeanPostProcessor {
         this.serviceRegistry = serviceRegistry;
     }
 
+    /**
+     * 等bean初始化完成后执行，启动ServerBootStrap,监听服务
+     */
     @Override
     public void afterPropertiesSet() {
         new Thread(() -> {
@@ -78,6 +81,16 @@ public class RpcProvider implements InitializingBean, BeanPostProcessor {
         }
     }
 
+    /**
+     * spring容器中所有bean初始化前后操作
+     * 扫描项目下所有bean,有RpcService 注解的类
+     * 将所有的服务service通过metaMeta 注册到zookeeper
+     * 同时放到本地内存中 rpcServiceMap
+     * @param bean
+     * @param beanName
+     * @return
+     * @throws BeansException
+     */
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         RpcService rpcService = bean.getClass().getAnnotation(RpcService.class);

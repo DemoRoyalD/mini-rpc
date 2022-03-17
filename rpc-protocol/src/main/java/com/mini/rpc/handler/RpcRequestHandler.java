@@ -23,8 +23,14 @@ public class RpcRequestHandler extends SimpleChannelInboundHandler<MiniRpcProtoc
         this.rpcServiceMap = rpcServiceMap;
     }
 
+    /**
+     * netty 通信触发
+     * @param ctx
+     * @param protocol
+     */
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, MiniRpcProtocol<MiniRpcRequest> protocol) {
+        // 异步处理请求
         RpcRequestProcessor.submitRequest(() -> {
             MiniRpcProtocol<MiniRpcResponse> resProtocol = new MiniRpcProtocol<>();
             MiniRpcResponse response = new MiniRpcResponse();
@@ -61,6 +67,7 @@ public class RpcRequestHandler extends SimpleChannelInboundHandler<MiniRpcProtoc
 
         FastClass fastClass = FastClass.create(serviceClass);
         int methodIndex = fastClass.getIndex(methodName, parameterTypes);
+        // 通过cglib代理 处理
         return fastClass.invoke(methodIndex, serviceBean, parameters);
     }
 }

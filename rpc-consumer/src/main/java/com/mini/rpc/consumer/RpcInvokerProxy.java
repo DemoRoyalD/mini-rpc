@@ -31,6 +31,7 @@ public class RpcInvokerProxy implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        // 构建netty请求
         MiniRpcProtocol<MiniRpcRequest> protocol = new MiniRpcProtocol<>();
         MsgHeader header = new MsgHeader();
         long requestId = MiniRpcRequestHolder.REQUEST_ID_GEN.incrementAndGet();
@@ -42,6 +43,7 @@ public class RpcInvokerProxy implements InvocationHandler {
         header.setStatus((byte) 0x1);
         protocol.setHeader(header);
 
+        // set调用服务方法的信息
         MiniRpcRequest request = new MiniRpcRequest();
         request.setServiceVersion(this.serviceVersion);
         request.setClassName(method.getDeclaringClass().getName());
@@ -50,13 +52,11 @@ public class RpcInvokerProxy implements InvocationHandler {
         request.setParams(args);
         protocol.setBody(request);
 
-        RpcConsumer rpcConsumer = new RpcConsumer();
         MiniRpcFuture<MiniRpcResponse> future = new MiniRpcFuture<>(new DefaultPromise<>(new DefaultEventLoop()), timeout);
+        // 通过requestId 来绑定future获取结果
         MiniRpcRequestHolder.REQUEST_MAP.put(requestId, future);
-        rpcConsumer.sendRequest(protocol, this.registryService);
 
-        // TODO hold request by ThreadLocal
-
+        RpcConsumer.sendRequest(protocol, this.registryService);
 
         return future.getPromise().get(future.getTimeout(), TimeUnit.MILLISECONDS).getData();
     }

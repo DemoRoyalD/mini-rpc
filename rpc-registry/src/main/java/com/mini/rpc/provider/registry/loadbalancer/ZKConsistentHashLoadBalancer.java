@@ -7,6 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+/**
+ * 服务发现负载均衡
+ * 通过curator获取服务列表
+ */
 public class ZKConsistentHashLoadBalancer implements ServiceLoadBalancer<ServiceInstance<ServiceMeta>> {
     private final static int VIRTUAL_NODE_SIZE = 10;
     private final static String VIRTUAL_NODE_SPLIT = "#";
@@ -36,6 +40,9 @@ public class ZKConsistentHashLoadBalancer implements ServiceLoadBalancer<Service
     }
 
     private String buildServiceInstanceKey(ServiceInstance<ServiceMeta> instance) {
+        /**
+         * payload 存放服务代理
+         */
         ServiceMeta payload = instance.getPayload();
         return String.join(":", payload.getServiceAddr(), String.valueOf(payload.getServicePort()));
     }

@@ -20,6 +20,7 @@ public class RpcProviderAutoConfiguration {
     @Bean
     public RpcProvider init() throws Exception {
         RegistryType type = RegistryType.valueOf(rpcProperties.getRegistryType());
+        // 获取注册中心
         RegistryService serviceRegistry = RegistryFactory.getInstance(rpcProperties.getRegistryAddr(), type);
         return new RpcProvider(rpcProperties.getServicePort(), serviceRegistry);
     }

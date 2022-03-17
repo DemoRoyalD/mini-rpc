@@ -43,6 +43,7 @@ public class RpcConsumerPostProcessor implements ApplicationContextAware, BeanCl
 
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+        // 获取spring容器中所以beanDefinitionName
         for (String beanDefinitionName : beanFactory.getBeanDefinitionNames()) {
             BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanDefinitionName);
             String beanClassName = beanDefinition.getBeanClassName();
@@ -52,6 +53,9 @@ public class RpcConsumerPostProcessor implements ApplicationContextAware, BeanCl
             }
         }
 
+        /**
+         * 将未注册到spring容器中的beanDefinition 注册到spring容器中
+         */
         BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
         this.rpcRefBeanDefinitions.forEach((beanName, beanDefinition) -> {
             if (context.containsBean(beanName)) {
@@ -62,10 +66,15 @@ public class RpcConsumerPostProcessor implements ApplicationContextAware, BeanCl
         });
     }
 
+    /**
+     * 存放所有未注册到spring容器中的BeanDefinition / 自定义注入service中的field
+     * @param field
+     */
     private void parseRpcReference(Field field) {
         RpcReference annotation = AnnotationUtils.getAnnotation(field, RpcReference.class);
         if (annotation != null) {
             BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(RpcReferenceBean.class);
+            // 注明初始化方法为init
             builder.setInitMethodName(RpcConstants.INIT_METHOD_NAME);
             builder.addPropertyValue("interfaceClass", field.getType());
             builder.addPropertyValue("serviceVersion", annotation.serviceVersion());

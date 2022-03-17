@@ -22,7 +22,13 @@ public class ZookeeperRegistryService implements RegistryService {
 
     private final ServiceDiscovery<ServiceMeta> serviceDiscovery;
 
+    /**
+     * 初始化zookeeperClient, 同时基于curator 获取discovery
+     * @param registryAddr
+     * @throws Exception
+     */
     public ZookeeperRegistryService(String registryAddr) throws Exception {
+        // 初始化 zookeeper client
         CuratorFramework client = CuratorFrameworkFactory.newClient(registryAddr, new ExponentialBackoffRetry(BASE_SLEEP_TIME_MS, MAX_RETRIES));
         client.start();
         JsonInstanceSerializer<ServiceMeta> serializer = new JsonInstanceSerializer<>(ServiceMeta.class);
@@ -34,6 +40,11 @@ public class ZookeeperRegistryService implements RegistryService {
         this.serviceDiscovery.start();
     }
 
+    /**
+     * 注册服务
+     * @param serviceMeta
+     * @throws Exception
+     */
     @Override
     public void register(ServiceMeta serviceMeta) throws Exception {
         ServiceInstance<ServiceMeta> serviceInstance = ServiceInstance
